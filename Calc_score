@@ -1,0 +1,89 @@
+int calculate_score(char* sample_segment, char* candidate_segment)
+{
+  /* Some helpful variables you might (or might not) want to use */
+  int temp_score = 0;
+  int score = 0;
+  int iterations = 0;
+  int sample_length = strlen(sample_segment);
+  int candidate_length = strlen(candidate_segment);
+  int sample_length_in_codons = sample_length / 3;
+  int candidate_length_in_codons = candidate_length / 3;
+  int trailing = sample_length % 3;
+  int offset = 0, j = 0, base = 0, shift = 0, found = -1;
+  int LENGTH = sample_length - trailing;
+  char temp_sample[3];
+  char temp_candidate[3];
+  int codon_num = candidate_length_in_codons - sample_length_in_codons;
+  
+
+  //for(int k = 0; k < sample_length_in_codons; k++)
+  //{ 
+      /*This loop on the first run will compare sample codon [0,1,2] to 
+      candidate codon [0,1,2] until all codons in sample have been compared.
+      Then the for loop above shifts the candidate over one codon. So the sample
+      codon [0,1,2] will be compared to candidate codon [3,4,5] until
+      all codons have been exhausted.*/
+      for (int i = 0; i < sample_length_in_codons; i++) {
+
+          //initializes 3 char string with first codon of sample
+          //offset is used to move to the next codon in the sample
+          for (j = 0; j < 3; j++)
+          {
+              temp_sample[j] = sample_segment[j+offset];
+          }
+          
+          /*initializes 3 char string with first codon of candidate
+          Offset is used to move to the next codon in the sample
+          Shift is used to shift the entire candidate over 1 codon.*/
+          for (j = 0; j < 3; j++)
+          {
+              temp_candidate[j] = candidate_segment[j + offset + shift];
+          }
+          if ((sample_length + shift) > candidate_length) {
+              return score;
+          }
+          //gets codon indexes for later use
+          int index1 = get_codon_index(temp_sample);
+          int index2 = get_codon_index(temp_candidate);
+          found = strncmp(temp_sample, temp_candidate, 3);
+          //checks if codons are the same
+          if (found == 0)
+          {
+              temp_score += 10;
+          }
+          //else checks if the 2 codons are the same amino acid
+          else if ((strcmp(codon_names[index1], codon_names[index2])) == 0) {
+              temp_score += 5;
+          }
+          //else checks if letters match or if they are a base pair
+          else
+          {
+              for (int n = 0; n < 3; n++)
+              { 
+                  base = is_base_pair(temp_sample[n], temp_candidate[n]);
+                  //if letter is the same in the same slot +2
+                  if (temp_sample[n] == temp_candidate[n]) {
+                      temp_score += 2;
+                  }
+                  //if basepair +1
+                  else if (base == 1) {
+                      temp_score += 1;
+                  }
+
+              }
+
+          }
+          offset += 3;
+          iterations++;
+          score += temp_score;
+          temp_score = 0;
+          
+     // }
+      //shift += 3;
+      //iterations = 0;
+      //offset = 0;
+      
+  }
+  // Insert your code here (replace this return statement with your own code)
+  return score;
+}
